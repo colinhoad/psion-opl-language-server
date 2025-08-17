@@ -1,0 +1,8 @@
+# ignore build files
+.build/
+
+# ignore VS Code configuration
+.vscode/
+
+# ignore compiled files
+*.o
