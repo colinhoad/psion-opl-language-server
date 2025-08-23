@@ -1,6 +1,11 @@
 { 
+  Author: CJ Hoad
+  Date:   2025.08.16
+  Info:
   Demo language server using the Bash example from Jeff Chupp. This just exchanges
-  a simple initialization handshake and a small set of auto-completions.
+  a simple initialization handshake and a small set of auto-completions. Code
+  is a single block and not intended for production use, only to demonstrate the
+  principle of a bare bones working language server operating over stdio.
 }
 program SimpleLS;
 {$mode objfpc}{$H+}

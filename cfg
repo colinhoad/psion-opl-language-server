@@ -1,0 +1,30 @@
+# If compiling under Linux, ensure to include the default fpc.cfg for Linux.
+# If you have a custom install of FPC on Linux, change this path to match the 
+# location of the standard fpc.cfg file for your machine.
+
+#IFDEF LINUX
+  #INCLUDE /etc/fpc.cfg
+#ENDIF
+
+# ----- WINDOWS ONLY ----------------------------------------------------------
+# Default path to Windows fpc.cfg is the same regardless of 32 or 64-bit 
+# editions so define a simple variable called MSWINDOWS to be used for either
+
+#IFDEF WIN32
+  #DEFINE MSWINDOWS
+#ENDIF
+#IFDEF WIN64
+  #DEFINE MSWINDOWS
+#ENDIF
+
+# If compiling under Windows, ensure to include the default fpc.cfg for Windows
+# If you have a custom install of FPC, change this path to match the location
+# of the standard fpc.cfg file for your Windows machine.
+
+#IFDEF MSWINDOWS
+  #INCLUDE C:\FPC\$fpcversion\bin\i386-win32\fpc.cfg
+#ENDIF
+# -----------------------------------------------------------------------------
+
+# Now add in the classes and units used by this repository
+-Fusrc/*

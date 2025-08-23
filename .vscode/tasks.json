@@ -12,6 +12,7 @@
             "DEBUG": ".build/debug",
             "RELEASE": ".build/release",
             "DEPLOY": ".build/deploy",
+            "CFG": "cfg",
             "EXTENSION": "",
             "PROCESSOR": "-Px86_64",
             "SYNTAX": "-Mobjfpc"
@@ -38,7 +39,8 @@
                 "-gw",
                 "-godwarfsets",
                 "-FE${DEBUG}",
-                "-FU${OUTPUT}"
+                "-FU${OUTPUT}",
+                "@${CFG}"
             ],
             "presentation": {
                 "focus": true
@@ -76,7 +78,8 @@
                 "-B",
                 "-v",
                 "-FE${RELEASE}",
-                "-FU${OUTPUT}"
+                "-FU${OUTPUT}",
+                "@${CFG}"
             ],
             "presentation": {
                 "focus": true
@@ -114,7 +117,8 @@
                 "-B",
                 "-v",
                 "-FE${DEPLOY}",
-                "-FU${OUTPUT}"
+                "-FU${OUTPUT}",
+                "@${CFG}"
             ],
             "presentation": {
                 "focus": true
@@ -151,7 +155,8 @@
                 "-v",
                 "-s",
                 "-FE${OUTPUT}",
-                "-FU${OUTPUT}"
+                "-FU${OUTPUT}",
+                "@${CFG}"
             ],
             "presentation": {
                 "focus": true
