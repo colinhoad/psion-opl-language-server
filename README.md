@@ -4,13 +4,13 @@ Language server for the Open Programming Language (OPL) used by Psion portable c
 
 ## Status
 
-This is very much a work-in-progress project that is being shared for the primary purpose of feedback and general interest. As the language server becomes more mature, the list of features will grow and hoepfully reach a point where I am comfortable giving it a proper release number.
+This is very much a work-in-progress project that is being shared for the primary purpose of feedback and general interest. As the language server becomes more mature, the list of features will grow and hopefully reach a point where I am comfortable giving it a proper release number.
 
 ## Features
 
 Provides some sample auto-completes for various OPL keywords beginning with 'E':
 
-![Screenshot](https://github.com/colinhoad/psion-opl-language-server/blob/main/img/img/neovim-psion-opl-autocomplete.png?raw=true)
+![Screenshot](https://github.com/colinhoad/psion-opl-language-server/blob/main/img/neovim-psion-opl-autocomplete.png?raw=true)
 
 ## Requirements
 
