@@ -102,7 +102,10 @@ begin
                 Response;
   end
   else
-    Response := 'UNIDENTIFIED_METHOD';
+    if Method = 'shutdown' then
+      Response := 'SHUTDOWN'
+    else
+      Response := 'UNIDENTIFIED_METHOD';
 
   Result := Response;
 
