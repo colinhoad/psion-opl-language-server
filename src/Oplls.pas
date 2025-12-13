@@ -11,7 +11,7 @@ program Oplls;
 {$mode objfpc}{$H+}
 
 uses
-  SysUtils, StrUtils, RegExpr, Pipes, 
+  SysUtils, StrUtils, RegExpr, Pipes, BaseUnix,
   Oplls.ConfigFile, Oplls.Logger, Oplls.Helpers;
 
 const
@@ -29,6 +29,7 @@ var
   InputStream: TInputPipeStream;
   OutputStream: TOutputPipeStream;
   LsRequest, LsResponse: String;
+  FDS: Tfdset;
 
 procedure LsCheck;
 
@@ -122,11 +123,12 @@ begin
     // now loop until EOF to ensure OPL LS keeps checking for new requests
     while not EOF do
     begin
+      fpfd_zero(FDS); // clear all file descriptors in my file descriptor array
+      fpfd_set(0, FDS); // set the input file descriptor to 0 in my file descriptor array
+      fpSelect (1, @FDS, nil, nil, nil); // wait until the input file descriptor changes (i.e. input is received) - ignore write and except, and make timeout nil (i.e. infinite)
       if InputStream.NumBytesAvailable > 0 then
-        LsCheck
-      else
-        sleep(1); // ensures CPU doesn't get carried away
-      end;
+        LsCheck;
+    end;
 
   finally
     LsLog.WriteLine('CONCISE', 'INFO: LSP stopped listening.');
