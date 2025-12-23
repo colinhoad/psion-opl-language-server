@@ -161,13 +161,13 @@ begin
   
   if Method = 'textDocument/completion' then
     ResultArgument := '"isIncomplete": false, "items": [' +
-    '{ "label": "PROC" },' +
-    '{ "label": "ENDP" },' +
-    '{ "label": "ELSE" },' +
-    '{ "label": "ELSEIF" },' +
-    '{ "label": "ENDIF" },' +
-    '{ "label": "ENDV" },' +
-    '{ "label": "ENDWH" }' +
+    '{ "label": "PROC", "kind": 14, "detail": " procedure" },' +
+    '{ "label": "ENDP", "kind": 14, "detail": " end procedure" },' +
+    '{ "label": "ELSE", "kind": 14, "detail": " ...else..." },' +
+    '{ "label": "ELSEIF", "kind": 14, "detail": " ...else if..." },' +
+    '{ "label": "ENDIF", "kind": 14, "detail": " ...end if" },' +
+    '{ "label": "ENDV", "kind": 14, "detail": " ...end vector" },' +
+    '{ "label": "ENDWH", "kind": 14, "detail": " ...end while" }' +
     ']';
 
   if ResultArgument <> '' then
