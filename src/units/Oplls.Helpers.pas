@@ -15,13 +15,11 @@ unit Oplls.Helpers;
 interface
 
 function GetConfigPath(RelativePath: String) : String;
-function StripMessage(inputString: String) : String;
-function RequestHandler(Request: String) : String;
 
 implementation
 
 uses
-  fpjson, jsonparser, SysUtils;
+  SysUtils;
 
 function GetConfigPath(RelativePath: String) : String;
 {
@@ -31,84 +29,6 @@ function GetConfigPath(RelativePath: String) : String;
 }
 begin
   Result := ExtractFilePath(ParamStr(0)) + RelativePath;
-end;
-
-function StripMessage(inputString: String) : String;
-{
- strips off any leading characters (e.g. line breaks) from
- a request message
-}
-var
-  returnString: String;
-begin
-  returnString := inputString.SubString(inputString.IndexOf('{'));
-  Result := returnString;
-end;
-
-function RequestHandler(Request: String) : String;
-{
- identifies the method from the incoming request message and
- generates an appropriate response message for that method
-
- TO DO: Convert to class!
-}
-var
-  Method, ResultArgument, Response: String;
-  Id, ContentLength: Integer;
-  JsonRequest: TJSONData;
-
-begin
-
-  // initialise the resultArgument to empty string
-  ResultArgument := '';
-
-  // get JSON portion of request
-  JsonRequest := GetJSON(Request);
-
-  // parse JSON request to get the method
-  Method := JsonRequest.FindPath('method').AsString;
-
-  // check the method and respond with the capabilities
-  if Method = 'initialize' then
-    ResultArgument := '"capabilities": {"completionProvider": {}}';
-  
-  if Method = 'textDocument/completion' then
-    ResultArgument := '"isIncomplete": false, "items": [' +
-    '{ "label": "PROC" },' +
-    '{ "label": "ENDP" },' +
-    '{ "label": "ELSE" },' +
-    '{ "label": "ELSEIF" },' +
-    '{ "label": "ENDIF" },' +
-    '{ "label": "ENDV" },' +
-    '{ "label": "ENDWH" }' +
-    ']';
-
-  if ResultArgument <> '' then
-  begin
-    // get the id to respond to
-    Id := JsonRequest.FindPath('id').AsInteger;
-    // generate the JSON response message
-    Response := '{"jsonrpc": "2.0"' +
-    ',"id": ' + IntToStr(Id) + 
-    ',"result": {' + ResultArgument + '}}';
-
-    // cleanup
-    JsonRequest.Free;
-  
-    // prepare response message with content header
-    ContentLength := Length(Response);
-    Response := 'Content-Length: ' + 
-                IntToStr(ContentLength) + #13#10#13#10 +
-                Response;
-  end
-  else
-    if Method = 'shutdown' then
-      Response := 'SHUTDOWN'
-    else
-      Response := 'UNIDENTIFIED_METHOD';
-
-  Result := Response;
-
 end;
 
 end.

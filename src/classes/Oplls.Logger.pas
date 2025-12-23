@@ -28,7 +28,7 @@ type
         FFilename: String;
         FFullPath: String;
         FLogFile: TextFile;
-        function CodifyMode(ModeName: String) : Byte;
+      function CodifyMode(ModeName: String) : Byte;
 
     public
 

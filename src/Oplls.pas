@@ -11,8 +11,8 @@ program Oplls;
 {$mode objfpc}{$H+}
 
 uses
-  SysUtils, StrUtils, RegExpr, Pipes, BaseUnix,
-  Oplls.ConfigFile, Oplls.Logger, Oplls.Helpers;
+  SysUtils, BaseUnix,
+  Oplls.ConfigFile, Oplls.Logger, Oplls.Listener, Oplls.Helpers;
 
 const
   C_CONFIGPATH = 'config/';
@@ -20,78 +20,12 @@ const
   C_LOGPATH = 'logging-path';
   C_LOGMODE = 'logging-mode';
   C_LOGNAME = 'oplls';
-  C_RXHEADER = 'Content-Length: ([0-9]+)';
 
 var
   LsConfig: TLSConfigFile;
   LsLog: TLogger;
-  ReContentHeader: TRegExpr;
-  InputStream: TInputPipeStream;
-  OutputStream: TOutputPipeStream;
-  LsRequest, LsResponse: String;
-  FDS: Tfdset;
-
-procedure LsCheck;
-
-  begin
-
-    // initialise input and output pipe streams
-    InputStream := TInputPipeStream.Create(StdInputHandle);
-    OutputStream := TOutputPipeStream.Create(StdOutputHandle);
-
-    // reset LsRequest and LsResponse to empty strings
-    LsRequest := '';
-    LsResponse := '';
-
-    // read request from input pipe stream, the first line of which should be 
-    // the Content-Length header
-    if InputStream.NumBytesAvailable > 0 then
-    begin
-        SetLength(LsRequest, InputStream.NumBytesAvailable);
-        InputStream.Read(LsRequest[1], Length(LsRequest));
-        LsLog.WriteLine('VERBOSE', 'REQUEST: '+LsRequest);
-    end;
-
-    // if request message matches Content-Length regex... 
-    if ReContentHeader.Exec(LsRequest) then
-    begin
-      // initialise response message variable to be passed into function for
-      // parsing the JSON request and returning the LSP response message
-      LsRequest := LsRequest.SubString(LsRequest.IndexOf(
-                                                  ReContentHeader.Match[1]
-                                                  ) + 
-                                        Length(ReContentHeader.Match[1])
-                                      );
-
-      // check for leading line break characters and strip them off if they exist
-      LsRequest := StripMessage(LsRequest);
-
-      // pass in the JSON component of the request to the function
-      // for parsing and determining the LSP response message
-      if LsRequest <> '' then
-      begin
-        LsResponse := RequestHandler(LsRequest);
-        LsLog.WriteLine('STANDARD', 'RESPONSE: '+LsResponse);
-        if LsResponse = 'SHUTDOWN' then
-        begin
-          LsLog.WriteLine('CONCISE', 'INFO: LSP stopped listening.');
-          InputStream.Destroy;
-          OutputStream.Destroy;
-          Halt(0); // stops OPL LS
-        end
-      end;
-
-      // send response to the output pipe
-      if LsResponse <> 'UNIDENTIFIED_METHOD' then
-      begin
-        LsLog.WriteLine('STANDARD', 'RESPONSE: '+LsResponse);
-        OutputStream.Write(LsResponse[1], Length(LsResponse));
-        LsResponse := ''; // prevent infinite write to output pipe
-      end;
-
-    end
-
-  end;
+  LsListener: TListener;
+  FDS: TFdset;
 
 begin
 
@@ -115,20 +49,17 @@ begin
         WriteLn(StdErr, 'Unable to create OPL LS log file: ', E.Message);
     end;
 
-    // define regex for matching Content-Length header
-    ReContentHeader := TRegExpr.Create(C_RXHEADER);
+    // initialise the OPL LS listener
+    LsListener := TListener.Create(LsLog, LsConfig);
 
-    // call LsCheck to ensure the handshake between OPL LS and IDE takes place
-    LsCheck;
-    // now loop until EOF to ensure OPL LS keeps checking for new requests
+    // now loop until EOF to ensure OPL LS listener keeps checking for new requests
     while not EOF do
     begin
-      fpfd_zero(FDS); // clear all file descriptors in my file descriptor array
-      fpfd_set(0, FDS); // set the input file descriptor to 0 in my file descriptor array
-      fpSelect (1, @FDS, nil, nil, nil); // wait until the input file descriptor changes (i.e. input is received) - ignore write and except, and make timeout nil (i.e. infinite)
-      if InputStream.NumBytesAvailable > 0 then
-        LsCheck;
-    end;
+      fpfd_zero(FDS); // clear all file descriptors (i.e. set them to 0) in my file descriptor array
+      fpfd_set(0, FDS); // sets the stdin (identity=0) bit in my file descriptor array to 1
+      fpSelect (1, @FDS, nil, nil, nil); // wait until stdin changes (i.e. input received), ignore stdout and stderr, and make timeout nil (i.e. infinite)
+      LsListener.Listen; // listen to request and provide a response
+      end;
 
   finally
     LsLog.WriteLine('CONCISE', 'INFO: LSP stopped listening.');
